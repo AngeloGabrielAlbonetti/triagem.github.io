@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Triagem Clínica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --text: #1a1a1a;
+            --muted: #6c757d;
+            --card-bg: rgba(255, 255, 255, 0.8);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 40px 16px;
+            background: linear-gradient(-45deg, #e3f2fd, #bbdefb, #90caf9, #64b5f6);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+            overflow-y: auto;
+        }
+        
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease;
+        }
+        
+        header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-top: 8px;
+            font-weight: 700;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-radius: 20px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
+            margin-bottom: 40px;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        input {
+            padding: 12px;
+            width: 100%;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 1px solid #cfd8dc;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+        
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
+        }
+        
+        .btn {
+            padding: 14px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 8px;
+            color: #fff;
+            min-width: 130px;
+        }
+        
+        .btn-none {
+            background: #90a4ae;
+        }
+        
+        .btn-leve {
+            background: var(--success);
+        }
+        
+        .btn-moderado {
+            background: var(--warning);
+            color: #000;
+        }
+        
+        .btn-grave {
+            background: var(--danger);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 999px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 8px;
+        }
+        
+        .vermelha {
+            background: var(--danger);
+        }
+        
+        .laranja {
+            background: var(--warning);
+            color: #000;
+        }
+        
+        .verde {
+            background: var(--success);
+        }
+        
+        .azul {
+            background: var(--primary);
+        }
+        
+        .question {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+        
+        a {
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="https://cdn-icons-png.flaticon.com/512/2966/2966488.png" width="64">
+        <h1>Triagem Clínica</h1>
+        <p style="color:#455a64;">Avaliação rápida de sintomas — confidencial e gratuita.</p>
+    </header>
+
+    <div class="card" id="card">
+        <p>👋 Bem-vindo(a)!<br>Preencha suas informações para iniciar a triagem.</p>
+        <input type="text" id="nome" placeholder="Nome completo">
+        <input type="number" id="idade" placeholder="Idade">
+        <input type="tel" id="telefone" placeholder="(xx) xxxxx-xxxx">
+        <input type="email" id="email" placeholder="Seu e-mail">
+        <button class="btn btn-primary" id="start">Iniciar Triagem</button>
+    </div>
+
+    <script>
+        const perguntas = [
+            'Você está com tosse?',
+            'Você tem febre?',
+            'Sente falta de ar?',
+            'Sente dor no peito?',
+            'Sente tontura?',
+            'Está com dor de cabeça?',
+            'Está com dor de garganta?',
+            'Sente náusea ou vômito?',
+            'Está com dor de barriga?',
+            'Sente dores no corpo?'
+        ];
+
+        let respostas = [];
+        let passo = -1;
+        let nomeUsuario = '',
+            idadeUsuario = 0,
+            telefoneUsuario = '',
+            emailUsuario = '';
+        const card = document.getElementById('card');
+
+        document.getElementById('start').addEventListener('click', () => {
+            nomeUsuario = document.getElementById('nome').value.trim();
+            idadeUsuario = parseInt(document.getElementById('idade').value.trim());
+            telefoneUsuario = document.getElementById('telefone').value.trim();
+            emailUsuario = document.getElementById('email').value.trim();
+
+            if (!nomeUsuario || !idadeUsuario || !telefoneUsuario || !emailUsuario)
+                return alert('Por favor, preencha todos os campos.');
+
+            passo = 0;
+            mostrarPergunta();
+        });
+
+        function mostrarPergunta() {
+            if (passo < perguntas.length) {
+                card.innerHTML = `
+                    <div class="question">🩺 ${perguntas[passo]}</div>
+                    <button class="btn btn-none" onclick="responder(0)">Sem sintoma</button>
+                    <button class="btn btn-leve" onclick="responder(1)">Leve</button>
+                    <button class="btn btn-moderado" onclick="responder(2)">Moderado</button>
+                    <button class="btn btn-grave" onclick="responder(3)">Grave</button>
+                `;
+            } else {
+                calcularResultado();
+            }
+        }
+
+        function responder(v) {
+            respostas.push(v);
+            passo++;
+            setTimeout(mostrarPergunta, 400);
+        }
+
+        function calcularResultado() {
+            let total = respostas.reduce((a, b) => a + b, 0);
+            if (idadeUsuario >= 60) total *= 1.3;
+            else if (idadeUsuario <= 12) total *= 1.2;
+            total = Math.round(total);
+
+            let classificacao = '',
+                cor = '',
+                mensagem = '';
+
+            if (total >= 20) {
+                classificacao = 'Caso Grave';
+                cor = 'vermelha';
+                mensagem = '🚨 Procure atendimento médico imediatamente!';
+            } else if (total >= 10) {
+                classificacao = 'Caso Moderado';
+                cor = 'laranja';
+                mensagem = '⚠️ Fique atento. Se os sintomas piorarem, procure um médico.';
+            } else if (total >= 4) {
+                classificacao = 'Caso Leve';
+                cor = 'verde';
+                mensagem = '🩹 Sintomas leves. Mantenha repouso e hidratação.';
+            } else {
+                classificacao = 'Rotina';
+                cor = 'azul';
+                mensagem = '😌 Nenhum sintoma relevante. Continue se cuidando.';
+            }
+
+            // --- ENVIO DIRETO PARA O WHATSAPP DO USUÁRIO ---
+            let numeroWhatsApp = telefoneUsuario.replace(/\D/g, "");
+
+            const textoWhatsApp = encodeURIComponent(
+                `*Resultado da Triagem Clínica*\n\n` +
+                `👤 *Nome:* ${nomeUsuario}\n` +
+                `🎂 *Idade:* ${idadeUsuario}\n` +
+                `📱 *Telefone:* ${telefoneUsuario}\n\n` +
+                `📌 *Classificação:* ${classificacao}\n` +
+                `⭐ *Pontuação:* ${total}\n\n` +
+                `${mensagem}`
+            );
+
+            const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${textoWhatsApp}`;
+
+            card.innerHTML = `
+                <div class="result">
+                  <h2>Resultado da Triagem</h2>
+                  <p><strong>Nome:</strong> ${nomeUsuario}</p>
+                  <p><strong>Idade:</strong> ${idadeUsuario} anos</p>
+                  <p><strong>Telefone:</strong> ${telefoneUsuario}</p>
+                  <p>Sua classificação é:</p>
+                  <span class="badge ${cor}">${classificacao}</span>
+                  <p style="margin-top:12px;color:var(--muted)">(${total} pontos totais)</p>
+                  <p style="margin-top:16px;">${mensagem}</p>
+
+                  <br>
+                  <a href="${linkWhatsApp}" target="_blank">
+                    <button class="btn btn-primary">📲 Enviar Resultado pelo WhatsApp</button>
+                  </a>
+
+                  <br><br>
+                  <button class="btn btn-none" onclick="location.reload()">Nova Triagem</button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
